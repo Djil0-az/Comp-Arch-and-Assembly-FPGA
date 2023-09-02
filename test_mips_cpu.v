@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module test_mips_cpu;
+module test_mips_basic_instructions_cpu;
   reg clk1, clk2;
   integer k;
   mips_cpu mips (clk1, clk2);
@@ -30,7 +30,7 @@ module test_mips_cpu;
   begin
     clk1 = 0;
     clk2 = 0;
-    repeat (20) // Generating two-phase clock
+    repeat (50) // Generating two-phase clock
     begin
       #5 clk1 = ~clk1;
       #5 clk2 = ~clk2;
@@ -75,7 +75,7 @@ module test_mips_cpu;
   initial
   begin
     $dumpfile ("mips_cpu.vcd");
-    $dumpvars (0, test_mips_cpu);
+    $dumpvars (0, test_mips_basic_instructions_cpu);
   end
 endmodule
 

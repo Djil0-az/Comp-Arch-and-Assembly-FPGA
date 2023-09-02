@@ -72,7 +72,7 @@ begin
     STALL_IF <= #2 1'b0;
     
     // Check if the current instruction writes to a register
-    if (IF_ID_IR[15:11] != 5'b00000) // Avoid handling registers 0
+    if (1) // Avoid handling registers 0
     begin
       // Check if the source registers of the IF stage instructions match the destination register of the current instruction
       if ((IF_ID_IR[25:21] == ID_EX_IR[15:11]) || (IF_ID_IR[20:16] == ID_EX_IR[15:11]))
@@ -196,7 +196,7 @@ begin
     MEM_WB_IR <= #2 EX_MEM_IR;
 
     // Data Hazard Detection
-    if (EX_MEM_type == LOAD || EX_MEM_type == STORE) // Only perform hazard detection for memory operations
+    if (1) // Only perform hazard detection for memory operations
     begin
       // Check if the destination register of the current instruction in the MEM stage matches the source registers
       // of instructions in the ID and EX stages
