@@ -22,21 +22,21 @@
 
 module vga_char(	
 				clk,rst_n,		
-				hsync,vsync,r,g,b	// VGA¿ØÖÆ
+				hsync,vsync,r,g,b	// VGAæ§åˆ¶
 			);
 
     input clk;	    // 100MHz
-    input rst_n;	//¸´Î»ĞÅºÅ ĞŞ¸Ä×¢ÊÍ
-    output hsync;	      //ĞĞÍ¬²½ĞÅºÅ
-    output vsync;	      //³¡Í¬²½ĞÅºÅ
-    output[3:0] r;    //ºìÉ«Êä³öĞÅºÅ
-    output[3:0] g;     //ÂÌÉ«Êä³öĞÅºÅ
-    output[3:0] b;      //À¶É«Êä³öĞÅºÅ
+    input rst_n;	//å¤ä½ä¿¡å· ä¿®æ”¹æ³¨é‡Š
+    output hsync;	      //è¡ŒåŒæ­¥ä¿¡å·
+    output vsync;	      //åœºåŒæ­¥ä¿¡å·
+    output[3:0] r;    //çº¢è‰²è¾“å‡ºä¿¡å·
+    output[3:0] g;     //ç»¿è‰²è¾“å‡ºä¿¡å·
+    output[3:0] b;      //è“è‰²è¾“å‡ºä¿¡å·
 
-    reg[9:0] x_cnt;		//ĞĞ×ø±ê
-    reg[9:0] y_cnt;		//ÁĞ×ø±ê
-    reg clk_vga=0;    //vgaÊ±ÖÓ
-    reg clk_cnt=0;     //·ÖÆµ¼ÆÊı
+    reg[9:0] x_cnt;		//è¡Œåæ ‡
+    reg[9:0] y_cnt;		//åˆ—åæ ‡
+    reg clk_vga=0;    //vgaæ—¶é’Ÿ
+    reg clk_cnt=0;     //åˆ†é¢‘è®¡æ•°
 
     always @(posedge clk or negedge rst_n)begin 
         if(!rst_n)  
@@ -50,8 +50,8 @@ module vga_char(
      end
 
 
-        reg valid_yr;	//ĞĞÏÔÊ¾ÓĞĞ§ĞÅºÅ
-      always @ (posedge clk_vga or negedge rst_n)begin //480ĞĞ
+        reg valid_yr;	//è¡Œæ˜¾ç¤ºæœ‰æ•ˆä¿¡å·
+      always @ (posedge clk_vga or negedge rst_n)begin //480è¡Œ
           if(!rst_n) valid_yr <= 1'b0;
           else if(y_cnt == 10'd32) valid_yr <= 1'b1;
           else if(y_cnt == 10'd511) valid_yr <= 1'b0;    
@@ -60,7 +60,7 @@ module vga_char(
       wire valid_y = valid_yr;
 
       reg valid_r;    
-      always @ (posedge clk_vga or negedge rst_n)begin //640ÁĞ
+      always @ (posedge clk_vga or negedge rst_n)begin //640åˆ—
           if(!rst_n) valid_r <= 1'b0;
           else if((x_cnt == 10'd141) && valid_y) valid_r <= 1'b1;
           else if((x_cnt == 10'd781) && valid_y) valid_r <= 1'b0;
@@ -79,76 +79,88 @@ module vga_char(
         else if(x_cnt == 10'd799) y_cnt <= y_cnt+1'b1;
      end
 
-	// VGA³¡Í¬²½,ĞĞÍ¬²½ĞÅºÅ
+	// VGAåœºåŒæ­¥,è¡ŒåŒæ­¥ä¿¡å·
     reg hsync_r,vsync_r;	
 
     always @ (posedge clk_vga or negedge rst_n)begin
         if(!rst_n) hsync_r <= 1'b1;								
-        else if(x_cnt == 10'd0) hsync_r <= 1'b0;	//²úÉúhsyncĞÅºÅ
+        else if(x_cnt == 10'd0) hsync_r <= 1'b0;	//äº§ç”Ÿhsyncä¿¡å·
         else if(x_cnt == 10'd96) hsync_r <= 1'b1;
     end
 
     always @ (posedge clk_vga or negedge rst_n)begin
         if(!rst_n) vsync_r <= 1'b1;							
-        else if(y_cnt == 10'd0) vsync_r <= 1'b0;	//²úÉúvsyncĞÅºÅ
+        else if(y_cnt == 10'd0) vsync_r <= 1'b0;	//äº§ç”Ÿvsyncä¿¡å·
         else if(y_cnt == 10'd2) vsync_r <= 1'b1;
      end
 
     assign hsync = hsync_r;
     assign vsync = vsync_r;
-    //·Ö±æÂÊ640*480
-    wire[9:0] x_dis;		//ºá×ø±êÏÔÊ¾ÓĞĞ§ÇøÓòÏà¶Ô×ø±êÖµ0-639
-    wire[9:0] y_dis;		//Êú×ø±êÏÔÊ¾ÓĞĞ§ÇøÓòÏà¶Ô×ø±êÖµ0-479
+    //åˆ†è¾¨ç‡640*480
+    wire[9:0] x_dis;		//æ¨ªåæ ‡æ˜¾ç¤ºæœ‰æ•ˆåŒºåŸŸç›¸å¯¹åæ ‡å€¼0-639
+    wire[9:0] y_dis;		//ç«–åæ ‡æ˜¾ç¤ºæœ‰æ•ˆåŒºåŸŸç›¸å¯¹åæ ‡å€¼0-479
 
-    //¼õÈ¥ÏûÒşÇø£¬×ª»»³ÉÒ×ÓÚÀí½âµÄ640*480
-    assign x_dis = x_cnt - 10'd142;
- assign y_dis = y_cnt - 10'd33;
-    parameter 		//"FPGA"ËÄ¸ö×Ö·ûµÄ×Ö¿â
-    
-                    char_line00 = 128'hFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF,
-                    char_line01 = 128'hFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF,
-                    char_line02 = 128'hFF0000000000000000000000000000FF,
-                    char_line03 = 128'hFF0000000000000000000000000000FF,
-                    char_line04 = 128'hFF0000000000000000000000000000FF,
-                    char_line05 = 128'hFF0000000000000000000000000000FF,
-                    char_line06 = 128'hFF0000000000000000000000000000FF,
-                    char_line07 = 128'hFF0000000000000000000000000000FF,
-                    char_line08 = 128'hFF0000000000000000000000000000FF,
-                    char_line09 = 128'hFF0000000000000000000000000000FF,
-                    char_line0a = 128'hFF0000000000000000000000000000FF,
-                    char_line0b = 128'hFF0000000000000000000000000000FF,
-                    char_line0c = 128'hFF0000000000000000000000000000FF,
-                    char_line0d = 128'hFF0000000000000000000000000000FF,
-                    char_line0e = 128'hFF0000000000000000000000000000FF,
-                    char_line0f = 128'hFF0000000000000000000000000000FF,
-                    char_line10 = 128'hFF0000000000000000000000000000FF,
-                    char_line11 = 128'hFF0000000000000000000000000000FF,
-                    char_line12 = 128'hFF0000000000000000000000000000FF,
-                    char_line13 = 128'hFF0000000000000000000000000000FF,
-                    char_line14 = 128'hFF0000000000000000000000000000FF,
-                    char_line15 = 128'hFF0000000000000000000000000000FF,
-                    char_line16 = 128'hFF0000000000000000000000000000FF,
-                    char_line17 = 128'hFF0000000000000000000000000000FF,
-                    char_line18 = 128'hFF0000000000000000000000000000FF,
-                    char_line19 = 128'hFF0000000000000000000000000000FF,
-                    char_line1a = 128'hFF0000000000000000000000000000FF,
-                    char_line1b = 128'hFF0000000000000000000000000000FF,
-                    char_line1c = 128'hFF0000000000000000000000000000FF,
-                    char_line1d = 128'hFF0000000000000000000000000000FF,
-                    char_line1e = 128'hFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF,
-                    char_line1f = 128'hFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
-    reg[6:0] char_bit;	
-    always @(posedge clk_vga or negedge rst_n) //ÔÚ640*480ÕóÁĞÖĞÑ¡È¡Î»ÖÃÏÔÊ¾×Ö·û"FPGA"
+//å‡å»æ¶ˆéšåŒºï¼Œè½¬æ¢æˆæ˜“äºç†è§£çš„640*480
+assign x_dis = x_cnt - 10'd142;
+assign y_dis = y_cnt - 10'd33;
+
+reg [27:0] bat;
+reg [127:0] char_line_solid;
+reg [127:0] char_line_fluid;
+
+always@(posedge clk_vga or negedge rst_n) begin
+	if (!rst_n) begin
+		char_line_solid <= 128'h0;
+		char_line_fluid <= 128'h0;
+	end
+	else begin
+		char_line_solid <= 128'hFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+		char_line_fluid <= 128'h{
+			FF,
+			F{bat[0]},
+			F{bat[1]}, 
+			F{bat[2]}, 
+			F{bat[3]}, 
+			F{bat[4]}, 
+			F{bat[5]}, 
+			F{bat[6]}, 
+			F{bat[7]}, 
+			F{bat[8]}, 
+			F{bat[9]}, 
+			F{bat[10]}, 
+			F{bat[11]}, 
+			F{bat[12]}, 
+			F{bat[13]}, 
+			F{bat[14]}, 
+			F{bat[15]}, 
+			F{bat[16]}, 
+			F{bat[17]}, 
+			F{bat[18]}, 
+			F{bat[19]}, 
+			F{bat[20]}, 
+			F{bat[21]}, 
+			F{bat[22]}, 
+			F{bat[23]}, 
+			F{bat[24]}, 
+			F{bat[25]}, 
+			F{bat[26]}, 
+			F{bat[27]}, 
+			FF
+		};
+	end
+end
+reg[6:0] char_bit;	
+    always @(posedge clk_vga or negedge rst_n) //åœ¨640*480é˜µåˆ—ä¸­é€‰å–ä½ç½®æ˜¾ç¤ºå­—ç¬¦"FPGA"
         if(!rst_n) char_bit <= 7'h7f;
-        else if(x_cnt == 10'd400) char_bit <= 7'd128;	//ÏÈÏÔÊ¾¸ßÎ»£¬yi´Îµİ¼õ
+        else if(x_cnt == 10'd400) char_bit <= 7'd128;	//å…ˆæ˜¾ç¤ºé«˜ä½ï¼Œyiæ¬¡é€’å‡
         else if(x_cnt > 10'd400 && x_cnt < 10'd528) char_bit <= char_bit-1'b1;
 
     reg[11:0] vga_rgb;
-    always @ (posedge clk_vga) begin//Êä³öÃ¿Ò»ĞĞµÄĞÅºÅ£¬
+    always @ (posedge clk_vga) begin//è¾“å‡ºæ¯ä¸€è¡Œçš„ä¿¡å·ï¼Œ
         if(!valid) vga_rgb <= 12'b0000_0000_0000;
         else if(x_cnt >= 10'd400 && x_cnt < 10'd528) begin//=
             case(y_dis)
-                10'd200: if(char_line00[char_bit]) vga_rgb <= 12'b1111_1111_1111;														//°×É«×ÖÌå£¬¿É×ÔĞĞÉè¶¨
+                10'd200: if(char_line00[char_bit]) vga_rgb <= 12'b1111_1111_1111;														//ç™½è‰²å­—ä½“ï¼Œå¯è‡ªè¡Œè®¾å®š
                          else vga_rgb <= 12'b0000_0000_0000;	
                 10'd201: if(char_line01[char_bit]) vga_rgb <= 12'b1111_1111_1111;
                            else vga_rgb <= 12'b0000_0000_0000;   
@@ -217,7 +229,7 @@ module vga_char(
         end
         else vga_rgb <= 12'h000; 
     end  
-    //basys3ÉÏµ¥¸öÑÕÉ«ÓĞËÄÎ»¿ØÖÆĞÅºÅ£¬¿ÉÒÔ×ÔĞĞÑ¡Ôñ¿ØÖÆÎ»Êı
+    //basys3ä¸Šå•ä¸ªé¢œè‰²æœ‰å››ä½æ§åˆ¶ä¿¡å·ï¼Œå¯ä»¥è‡ªè¡Œé€‰æ‹©æ§åˆ¶ä½æ•°
     assign r = vga_rgb[11:8];
     assign g = vga_rgb[7:4];
     assign b = vga_rgb[3:0];
