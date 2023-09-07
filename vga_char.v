@@ -37,6 +37,22 @@ module vga_char(
     reg clk_vga = 0;   // VGA clock
     reg clk_cnt = 0;   // Frequency divider counter
 
+    integer  clk_cnt_tmp = 0;
+    reg clk_tmp = 0;
+
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n)
+            clk_tmp <= 1'b0;
+        else if (clk_cnt_tmp >= 'd10000000) begin
+            clk_tmp <= ~clk_tmp;
+            clk_cnt_tmp <= 0;
+        end
+        else
+            clk_cnt_tmp <= clk_cnt_tmp + 1;
+    end
+
+
+
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n)
             clk_vga <= 1'b0;
@@ -120,9 +136,23 @@ module vga_char(
     assign x_dis = x_cnt - 10'd142;
     assign y_dis = y_cnt - 10'd33;
 
-    reg [27:0] bat;
+    reg [111:0] bat;
     reg [127:0] char_line_solid;
     reg [127:0] char_line_fluid;
+
+
+    always @(posedge clk_tmp or negedge rst_n) begin
+        if (!rst_n) begin
+            bat <= 'd1;
+        end
+        else if (bat >= 111'hFFFFFFFFFFFFFFFFFFFFFFFFFFFF) begin
+            bat <= 'd1;
+        end
+        else begin
+            bat <= {bat[110:0], 1'd1};
+        end
+    
+    end
 
     always @(posedge clk_vga or negedge rst_n) begin
         if (!rst_n) begin
@@ -131,52 +161,19 @@ module vga_char(
         end
         else begin
             char_line_solid <= 128'hFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
-            
-           char_line_fluid <= {
-            128'hFF,
-            bat[0],
-            bat[1],
-            bat[2],
-            bat[3],
-            bat[4],
-            bat[5],
-            bat[6],
-            bat[7],
-            bat[8],
-            bat[9],
-            bat[10],
-            bat[11],
-            bat[12],
-            bat[13],
-            bat[14],
-            bat[15],
-            bat[16],
-            bat[17],
-            bat[18],
-            bat[19],
-            bat[20],
-            bat[21],
-            bat[22],
-            bat[23],
-            bat[24],
-            bat[25],
-            bat[26],
-            bat[27],
-            128'hFF
-        };
+            char_line_fluid <= {8'hFF, bat, 8'hFF};
         end
     end
     reg[6:0] char_bit;
-    always @(posedge clk_vga or negedge rst_n) begin
+      always @(posedge clk_vga or negedge rst_n) begin
         // In a 640x480 array, select a location to display the character "FPGA"
         if (!rst_n)
             char_bit <= 7'h7f;
         else if (x_cnt == 10'd400)
-            char_bit <= 7'd128;  // Display high bits first, decrement by 1 each time
+            char_bit <= 7'd127;  // Display high bits first, decrement by 1 each time
         else if (x_cnt > 10'd400 && x_cnt < 10'd528)
             char_bit <= char_bit - 1'b1;
     end
-
     reg[11:0] vga_rgb;
     always @ (posedge clk_vga) begin
         // Output the signal for each row
@@ -224,10 +221,9 @@ module vga_char(
             vga_rgb <= 12'h000;
     end
 
+
     // On the Basys3, each color has four control signals, which can be adjusted
     assign r = vga_rgb[11:8];
     assign g = vga_rgb[7:4];
     assign b = vga_rgb[3:0];
 endmodule
-
-
