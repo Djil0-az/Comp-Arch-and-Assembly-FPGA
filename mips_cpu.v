@@ -1,29 +1,8 @@
-`timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 08/29/2023 06:36:51 PM
-// Design Name: 
-// Module Name: mips_cpu
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
-
-module mips_cpu( clk1, clk2
+module mips_cpu( clk1, clk2, bat_ctl
  );
   
   input clk1, clk2; // Two-phase clock
+  output [4:0] bat_ctl;
   reg [31:0] PC, IF_ID_IR, IF_ID_NPC;
   reg [31:0] ID_EX_IR, ID_EX_NPC, ID_EX_A, ID_EX_B, ID_EX_Imm;
   reg [2:0] ID_EX_type, EX_MEM_type, MEM_WB_type;
@@ -239,4 +218,12 @@ end
         HALTED <= #2 1'b1;
     endcase
   end
+
+   //**** Battery Control
+  always @(posedge clk1) // Assigning reg 32 to output bat_ctl to control VGA
+  begin
+      bat_ctl <= Reg[31][4:0];
+  end
+
+   
 endmodule
