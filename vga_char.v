@@ -20,12 +20,13 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module vga_char(
-    clk, rst_n,
+    clk, rst_n,bat_ctl,
     hsync, vsync, r, g, b   // VGA control
 );
 
     input clk;        // 100MHz
     input rst_n;      // Reset signal (Modified comment)
+    input [4:0] bat_ctl; 
     output hsync;     // Horizontal sync signal
     output vsync;     // Vertical sync signal
     output[3:0] r;    // Red output signal
@@ -36,22 +37,6 @@ module vga_char(
     reg[9:0] y_cnt;    // Vertical coordinate
     reg clk_vga = 0;   // VGA clock
     reg clk_cnt = 0;   // Frequency divider counter
-
-    integer  clk_cnt_tmp = 0;
-    reg clk_tmp = 0;
-
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n)
-            clk_tmp <= 1'b0;
-        else if (clk_cnt_tmp >= 'd10000000) begin
-            clk_tmp <= ~clk_tmp;
-            clk_cnt_tmp <= 0;
-        end
-        else
-            clk_cnt_tmp <= clk_cnt_tmp + 1;
-    end
-
-
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n)
@@ -141,15 +126,42 @@ module vga_char(
     reg [127:0] char_line_fluid;
 
 
-    always @(posedge clk_tmp or negedge rst_n) begin
+    always @(posedge clk_vga or negedge rst_n) begin
         if (!rst_n) begin
             bat <= 'd1;
         end
-        else if (bat >= 111'hFFFFFFFFFFFFFFFFFFFFFFFFFFFF) begin
-            bat <= 'd1;
-        end
         else begin
-            bat <= {bat[110:0], 1'd1};
+            case(bat_ctl)
+            5'd0: bat <= 'hF;
+            5'd1: bat <= 'hFF;
+            5'd2: bat <= 'hFFF;
+            5'd3: bat <= 'hFFFF;
+            5'd4: bat <= 'hFFFFF;
+            5'd5: bat <= 'hFFFFFF;
+            5'd6: bat <= 'hFFFFFFF;
+            5'd7: bat <= 'hFFFFFFFF;
+            5'd8: bat <= 'hFFFFFFFFFF;
+            5'd9: bat <= 'hFFFFFFFFFFF;
+            5'd10: bat <= 'hFFFFFFFFFFFFFF;
+            5'd11: bat <= 'hFFFFFFFFFFFFFFF;
+            5'd12: bat <= 'hFFFFFFFFFFFFFFFF;
+            5'd13: bat <= 'hFFFFFFFFFFFFFFFFFF;
+            5'd14: bat <= 'hFFFFFFFFFFFFFFFFFFF;
+            5'd15: bat <= 'hFFFFFFFFFFFFFFFFFFFF;
+            5'd16: bat <= 'hFFFFFFFFFFFFFFFFFFFFFF;
+            5'd17: bat <= 'hFFFFFFFFFFFFFFFFFFFFFFF;
+            5'd18: bat <= 'hFFFFFFFFFFFFFFFFFFFFFFFF;
+            5'd19: bat <= 'hFFFFFFFFFFFFFFFFFFFFFFFFFF;
+            5'd20: bat <= 'hFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+            5'd21: bat <= 'hFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+            5'd22: bat <= 'hFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+            5'd23: bat <= 'hFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+            5'd24: bat <= 'hFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+            5'd25: bat <= 'hFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+            5'd26: bat <= 'hFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+            5'd27: bat <= 'hFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+            5'd28: bat <= 'hFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+            endcase
         end
     
     end
