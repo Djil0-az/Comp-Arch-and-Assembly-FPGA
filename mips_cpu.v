@@ -2,7 +2,7 @@ module mips_cpu( clk1, clk2, bat_ctl
  );
   
   input clk1, clk2; // Two-phase clock
-  output [4:0] bat_ctl;
+  output reg [4:0] bat_ctl;
   reg [31:0] PC, IF_ID_IR, IF_ID_NPC;
   reg [31:0] ID_EX_IR, ID_EX_NPC, ID_EX_A, ID_EX_B, ID_EX_Imm;
   reg [2:0] ID_EX_type, EX_MEM_type, MEM_WB_type;
